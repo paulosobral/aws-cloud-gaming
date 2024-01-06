@@ -1,7 +1,7 @@
 region                        = "sa-east-1"
 root_block_device_volume_type = "gp3"
 root_block_device_size_gb     = 180
-root_block_device_iops        = 8000
+root_block_device_iops        = 16000
 root_block_device_throughput  = 250
 custom_ami                    = "ami-0019a85d6fa3b184f"
 skip_install                  = true
