@@ -3,6 +3,12 @@ variable "region" {
   type        = string
 }
 
+variable "tag_app_value" {
+  description = "Name with which to prefix resources in AWS"
+  type        = string
+  default     = "aws-cloud-gaming"
+}
+
 variable "resource_name" {
   description = "Name with which to prefix resources in AWS"
   type        = string

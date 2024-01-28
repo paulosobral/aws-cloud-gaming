@@ -2,9 +2,12 @@
 resource "aws_security_group" "default" {
   name = "${var.resource_name}-sg"
 
-  tags = {
-    App = "aws-cloud-gaming"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Resource = "aws_security_group"
+    }
+  )
 }
 
 # Allow rdp connections from the local ip
