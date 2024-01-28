@@ -2,10 +2,6 @@ provider "aws" {
   region = var.region
 }
 
-locals {
-  availability_zone = "${var.region}${element(var.allowed_availability_zone_identifier, random_integer.az_id.result)}"
-}
-
 resource "random_integer" "az_id" {
   min = 0
   max = length(var.allowed_availability_zone_identifier)
@@ -46,8 +42,11 @@ resource "aws_spot_instance_request" "windows_instance" {
     throughput  = var.root_block_device_throughput
   }
 
-  tags = {
-    Name = "${var.resource_name}-instance"
-    App  = "aws-cloud-gaming"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name     = "${var.resource_name}-instance",
+      Resource = "aws_spot_instance_request"
+    }
+  )
 }

@@ -8,7 +8,10 @@ resource "aws_ssm_parameter" "password" {
   type  = "SecureString"
   value = random_password.password.result
 
-  tags = {
-    App = "aws-cloud-gaming"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Resource = "aws_ssm_parameter"
+    }
+  )
 }

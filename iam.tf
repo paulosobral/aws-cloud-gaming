@@ -16,9 +16,12 @@ resource "aws_iam_role" "windows_instance_role" {
 }
 EOF
 
-  tags = {
-    App = "aws-cloud-gaming"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Resource = "aws_iam_role"
+    }
+  )
 }
 
 resource "aws_iam_policy" "password_get_parameter_policy" {
@@ -35,10 +38,6 @@ resource "aws_iam_policy" "password_get_parameter_policy" {
   ]
 }
 EOF
-}
-
-data "aws_iam_policy" "driver_get_object_policy" {
-  arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
 
 resource "aws_iam_role_policy_attachment" "password_get_parameter_policy_attachment" {

@@ -1,3 +1,7 @@
+data "aws_iam_policy" "driver_get_object_policy" {
+  arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
 data "aws_ami" "windows_ami" {
   most_recent = true
   owners      = ["amazon"]
