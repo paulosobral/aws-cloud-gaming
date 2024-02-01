@@ -47,9 +47,9 @@ function download-graphic-driver {
     $Bucket = ""
     $KeyPrefix = ""
     $InstallerFilter = "*win10*"
-    $downloadGraphicDriver = 0
+    $downloadGraphicDriver = false
 
-    if (regex "^g[0-9]+" $var.instance_type -match "g3") {
+    if (regex("^g[0-9]+", var.instance_type) == "g3") {
         # GRID driver for g3
         $Bucket = "ec2-windows-nvidia-drivers"
         $KeyPrefix = "latest"
@@ -64,9 +64,9 @@ function download-graphic-driver {
 
         New-Item -Path "HKLM:\SOFTWARE\NVIDIA Corporation\Global" -Name GridLicensing
         New-ItemProperty -Path "HKLM:\SOFTWARE\NVIDIA Corporation\Global\GridLicensing" -Name "NvCplDisableManageLicensePage" -PropertyType "DWord" -Value "1"
-        $downloadGraphicDriver = 1
+        $downloadGraphicDriver = true
     }
-    elseif (regex "^.{0,4}" $var.instance_type -match "g4ad") {
+    elseif (regex("^.{0,4}", var.instance_type) == "g4ad") {
         # vGaming driver for g4ad
         $Bucket = "ec2-amd-windows-drivers"
         $KeyPrefix = "latest"
@@ -79,7 +79,7 @@ function download-graphic-driver {
             }
         }
     }
-    elseif (regex "^g[0-9]+" $var.instance_type -match "g4") {
+    elseif (regex("^g[0-9]+", var.instance_type) == "g4") {
         # vGaming driver for g4
         $Bucket = "nvidia-gaming"
         $KeyPrefix = "windows/latest"
@@ -91,13 +91,10 @@ function download-graphic-driver {
                 Copy-S3Object -BucketName $Bucket -Key $Object.Key -LocalFile $LocalFilePath -Region us-east-1
             }
         }
-
-        New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\nvlddmkm\Global" -Name "vGamingMarketplace" -PropertyType "DWord" -Value "2"
-        Invoke-WebRequest -Uri "https://nvidia-gaming.s3.amazonaws.com/GridSwCert-Archive/GridSwCertWindows_2023_9_22.cert" -OutFile "$Env:PUBLIC\Documents\GridSwCert.txt"
-        $downloadGraphicDriver = 1
+        $downloadGraphicDriver = true
     }
 
-    if ($downloadGraphicDriver -eq 1) {
+    if ($downloadGraphicDriver -eq true) {
         # install task to disable second monitor on login
         $trigger = New-ScheduledTaskTrigger -AtLogon
         $action = New-ScheduledTaskAction -Execute displayswitch.exe -Argument "/internal"
