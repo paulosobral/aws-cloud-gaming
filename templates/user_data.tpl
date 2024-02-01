@@ -43,7 +43,7 @@ function install-autologin {
 # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/install-nvidia-driver.html#nvidia-gaming-driver
 function download-graphic-driver {
     
-    $ExtractionPath = "$home\Desktop\Drivers\NVIDIA"
+    $ExtractionPath = "$home\Desktop\Drivers\Graphics"
     $Bucket = ""
     $KeyPrefix = ""
     $InstallerFilter = "*win10*"
@@ -69,6 +69,20 @@ function download-graphic-driver {
 
     %{ else }
     %{ if regex("^g[0-9]+", var.instance_type) == "g4" }
+
+        %{ if var.instance_type == "g4ad" }
+            # vGaming driver for g4ad
+            $Bucket = "ec2-amd-windows-drivers"
+            $KeyPrefix = "latest"
+            $Objects = Get-S3Object -BucketName $Bucket -KeyPrefix $KeyPrefix -Region us-east-1
+            foreach ($Object in $Objects) {
+                $LocalFileName = $Object.Key
+                if ($LocalFileName -ne '' -and $Object.Size -ne 0) {
+                    $LocalFilePath = Join-Path $ExtractionPath $LocalFileName
+                    Copy-S3Object -BucketName $Bucket -Key $Object.Key -LocalFile $LocalFilePath -Region us-east-1
+                }
+            }
+        %{ else }
 
         # vGaming driver for g4
         $Bucket = "nvidia-gaming"
