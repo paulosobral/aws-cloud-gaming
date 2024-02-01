@@ -1,6 +1,6 @@
 region                        = "sa-east-1"
 root_block_device_volume_type = "gp3"
-root_block_device_size_gb     = 180
+root_block_device_size_gb     = 200
 root_block_device_iops        = 16000
 root_block_device_throughput  = 1000
 custom_ami                    = "ami-030b74d4ebbc45123"
