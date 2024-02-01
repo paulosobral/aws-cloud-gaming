@@ -1,9 +1,10 @@
 region                        = "sa-east-1"
+instance_type                 = "g4ad.xlarge"
 root_block_device_volume_type = "gp3"
 root_block_device_size_gb     = 200
 root_block_device_iops        = 16000
 root_block_device_throughput  = 1000
-custom_ami                    = "ami-030b74d4ebbc45123"
+custom_ami                    = ""
 skip_install                  = true
 install_parsec                = true
 install_auto_login            = true
