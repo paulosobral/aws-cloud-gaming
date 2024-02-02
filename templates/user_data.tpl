@@ -110,10 +110,10 @@ install-chocolatey
 Install-PackageProvider -Name NuGet -Force
 choco install awstools.powershell
 
-%{ if var.install_parsec }
-install-parsec-cloud-preparation-tool
-choco install parsec
-%{ endif }
+### %{ if var.install_parsec }
+### install-parsec-cloud-preparation-tool
+### choco install parsec
+### %{ endif }
 
 install-admin-password
 
