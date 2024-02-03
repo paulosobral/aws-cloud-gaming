@@ -42,11 +42,7 @@ resource "aws_spot_instance_request" "windows_instance" {
     throughput  = var.root_block_device_throughput
   }
 
-  tags = merge(
-    local.common_tags,
-    {
-      Name     = "${var.resource_name}-instance",
-      Resource = "aws_spot_instance_request"
-    }
-  )
+  tags = {
+    Name = "${var.resource_name}-instance",
+  }
 }
