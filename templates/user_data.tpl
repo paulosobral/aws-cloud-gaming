@@ -41,15 +41,16 @@ function install-autologin {
 }
 
 # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/install-nvidia-driver.html#nvidia-gaming-driver
-# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/install-amd-driver.html
 function download-graphic-driver {
-    $ExtractionPath = "$home\Desktop\Drivers\Graphics"
+    
+    $ExtractionPath = "$home\Desktop\Drivers\NVIDIA"
     $Bucket = ""
     $KeyPrefix = ""
     $InstallerFilter = "*win10*"
-    $downloadGraphicDriver = false
+    $downloadGraphicDriver = 0
 
-    if (regex("^g[0-9]+", var.instance_type) == "g3") {
+    %{ if regex("^g[0-9]+", var.instance_type) == "g3" }
+
         # GRID driver for g3
         $Bucket = "ec2-windows-nvidia-drivers"
         $KeyPrefix = "latest"
@@ -64,9 +65,10 @@ function download-graphic-driver {
 
         New-Item -Path "HKLM:\SOFTWARE\NVIDIA Corporation\Global" -Name GridLicensing
         New-ItemProperty -Path "HKLM:\SOFTWARE\NVIDIA Corporation\Global\GridLicensing" -Name "NvCplDisableManageLicensePage" -PropertyType "DWord" -Value "1"
-        $downloadGraphicDriver = true
-    }
-    elseif (regex("^.{0,4}", var.instance_type) == "g4ad") {
+        $downloadGraphicDriver = 1
+
+    %{ else }
+    %{ if regex("^.{0,4}", var.instance_type) == "g4ad" }
         # vGaming driver for g4ad
         $Bucket = "ec2-amd-windows-drivers"
         $KeyPrefix = "latest"
@@ -78,8 +80,9 @@ function download-graphic-driver {
                 Copy-S3Object -BucketName $Bucket -Key $Object.Key -LocalFile $LocalFilePath -Region us-east-1
             }
         }
-    }
-    elseif (regex("^g[0-9]+", var.instance_type) == "g4") {
+    %{ else }
+    %{ if regex("^g[0-9]+", var.instance_type) == "g4" }
+
         # vGaming driver for g4
         $Bucket = "nvidia-gaming"
         $KeyPrefix = "windows/latest"
@@ -91,20 +94,31 @@ function download-graphic-driver {
                 Copy-S3Object -BucketName $Bucket -Key $Object.Key -LocalFile $LocalFilePath -Region us-east-1
             }
         }
-        $downloadGraphicDriver = true
-    }
 
-    if ($downloadGraphicDriver -eq true) {
+        New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\nvlddmkm\Global" -Name "vGamingMarketplace" -PropertyType "DWord" -Value "2"
+        Invoke-WebRequest -Uri "https://nvidia-gaming.s3.amazonaws.com/GridSwCert-Archive/GridSwCertWindows_2023_9_22.cert" -OutFile "$Env:PUBLIC\Documents\GridSwCert.txt"
+        $downloadGraphicDriver = 1
+
+    %{ endif }
+    %{ endif }
+    %{ endif }
+
+    if ($downloadGraphicDriver == 1) {
+
         # install task to disable second monitor on login
         $trigger = New-ScheduledTaskTrigger -AtLogon
         $action = New-ScheduledTaskAction -Execute displayswitch.exe -Argument "/internal"
         Register-ScheduledTask -TaskName "disable-second-monitor" -Trigger $trigger -Action $action -RunLevel Highest
+
     }
     else {
         $action = New-ScheduledTaskAction -Execute powershell.exe -Argument "-WindowStyle Hidden -Command `"(New-Object -ComObject Wscript.Shell).Popup('Automatic GPU driver installation is unsupported for this instance type: ${var.instance_type}. Please install them manually.')`""
         run-once-on-login "gpu-driver-warning" $action
     }
 }
+
+
+
 
 install-chocolatey
 Install-PackageProvider -Name NuGet -Force

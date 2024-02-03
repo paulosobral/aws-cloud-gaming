@@ -12,7 +12,7 @@ data "aws_ami" "windows_ami" {
   }
 }
 
-data "external" "local_ip" {
+/* data "external" "local_ip" {
   # curl should (hopefully) be available everywhere
   program = ["curl", "https://api.ipify.org?format=json"]
-}
+} */
