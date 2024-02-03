@@ -41,9 +41,10 @@ function install-autologin {
 }
 
 # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/install-nvidia-driver.html#nvidia-gaming-driver
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/install-amd-driver.html
 function download-graphic-driver {
     
-    $ExtractionPath = "$home\Desktop\Drivers\NVIDIA"
+    $ExtractionPath = "$home\Desktop\Drivers\Graphics"
     $Bucket = ""
     $KeyPrefix = ""
     $InstallerFilter = "*win10*"
@@ -80,6 +81,9 @@ function download-graphic-driver {
                 Copy-S3Object -BucketName $Bucket -Key $Object.Key -LocalFile $LocalFilePath -Region us-east-1
             }
         }
+        Expand-Archive $LocalFilePath -DestinationPath "$home\Desktop\Drivers\Graphics\AMD\$KeyPrefix" -Verbose
+        pnputil /add-driver $home\Desktop\Drivers\Graphics\AMD\$KeyPrefix\*.inf /install /subdirs
+        $downloadGraphicDriver = 1
     %{ else }
     %{ if regex("^g[0-9]+", var.instance_type) == "g4" }
 
