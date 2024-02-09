@@ -12,7 +12,7 @@ resource "aws_spot_instance_request" "windows_instance" {
   availability_zone = local.availability_zone
   ami               = (length(var.custom_ami) > 0) ? var.custom_ami : data.aws_ami.windows_ami.image_id
   security_groups   = [aws_security_group.default.name]
-  user_data = var.skip_install ? "" : templatefile("${path.module}/templates/user_data.tpl", {
+  user_data = var.skip_install ? "" : templatefile("${path.module}/user_data/setup.tpl", {
     password_ssm_parameter = aws_ssm_parameter.password.name,
     var = {
       instance_type                = var.instance_type,
@@ -43,6 +43,8 @@ resource "aws_spot_instance_request" "windows_instance" {
   }
 
   tags = {
-    Name = "${var.resource_name}-instance",
+    Name = "${var.resource_name}-instance"
+    App  = "${var.tag_app_value}"
   }
+
 }
